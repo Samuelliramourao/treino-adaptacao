@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rotina Personalizada - Treino & Nutrição</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b1120;
+      color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35);
+    }
+    .day-pill.active {
+      background: #3b82f6;
+      color: #ffffff;
+      border-color: #60a5fa;
+    }
+    .exercise-done {
+      opacity: 0.55;
+      text-decoration: line-through;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+          <i data-lucide="dumbbell" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+            Rotina Recomp 360
+            <span class="text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">Tendão & Joelho Safe</span>
+          </h1>
+          <p class="text-xs text-slate-400">30 anos • 1,70 m • ~80 kg • Foco: -Gordura & +Massa</p>
+        </div>
+      </div>
+
+      <!-- Quick Action / Reset Daily -->
+      <button id="btn-reset-day" title="Reiniciar checklist do dia" class="text-xs bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 border border-slate-700 px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Resetar Hoje</span>
+      </button>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <div class="max-w-5xl mx-auto px-4 pt-1 pb-3 flex gap-2">
+      <button onclick="switchTab('treino')" id="nav-treino" class="tab-btn active flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition bg-slate-800 text-slate-400 hover:text-white border border-slate-700/50">
+        <i data-lucide="activity" class="w-4 h-4"></i>
+        <span>Treinos (Seg - Sex)</span>
+      </button>
+      <button onclick="switchTab('nutricao')" id="nav-nutricao" class="tab-btn flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition bg-slate-800 text-slate-400 hover:text-white border border-slate-700/50">
+        <i data-lucide="utensils" class="w-4 h-4"></i>
+        <span>Plano Alimentar</span>
+      </button>
+      <button onclick="switchTab('cuidados')" id="nav-cuidados" class="tab-btn flex-1 py-2.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition bg-slate-800 text-slate-400 hover:text-white border border-slate-700/50">
+        <i data-lucide="shield-check" class="w-4 h-4"></i>
+        <span>Tendão & Dicas</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 space-y-6">
+
+    <!-- ============================================== -->
+    <!-- SECTION 1: WORKOUT TAB -->
+    <!-- ============================================== -->
+    <section id="tab-treino" class="space-y-6">
+      
+      <!-- Day Selector Pills -->
+      <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+        <button onclick="selectDay('seg')" id="pill-seg" class="day-pill active flex-1 min-w-[100px] py-3 px-3 rounded-xl bg-slate-800/80 border border-slate-700 text-left transition hover:border-blue-500">
+          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Segunda</div>
+          <div class="text-sm font-bold text-white flex items-center gap-1 mt-0.5">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Full Body 1
+          </div>
+          <div class="text-[11px] text-slate-400 mt-1">Quad + Sóleo</div>
+        </button>
+
+        <button onclick="selectDay('ter')" id="pill-ter" class="day-pill flex-1 min-w-[100px] py-3 px-3 rounded-xl bg-slate-800/80 border border-slate-700 text-left transition hover:border-blue-500">
+          <div class="text-[10px] uppercase font-bold text-cyan-400 tracking-wider">Terça</div>
+          <div class="text-sm font-bold text-white flex items-center gap-1 mt-0.5">
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Natação
+          </div>
+          <div class="text-[11px] text-slate-400 mt-1">35-45 min Contínuo</div>
+        </button>
+
+        <button onclick="selectDay('qua')" id="pill-qua" class="day-pill flex-1 min-w-[100px] py-3 px-3 rounded-xl bg-slate-800/80 border border-slate-700 text-left transition hover:border-blue-500">
+          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Quarta</div>
+          <div class="text-sm font-bold text-white flex items-center gap-1 mt-0.5">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Full Body 2
+          </div>
+          <div class="text-[11px] text-slate-400 mt-1">Posterior Joelho</div>
+        </button>
+
+        <button onclick="selectDay('qui')" id="pill-qui" class="day-pill flex-1 min-w-[100px] py-3 px-3 rounded-xl bg-slate-800/80 border border-slate-700 text-left transition hover:border-blue-500">
+          <div class="text-[10px] uppercase font-bold text-cyan-400 tracking-wider">Quinta</div>
+          <div class="text-sm font-bold text-white flex items-center gap-1 mt-0.5">
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Natação
+          </div>
+          <div class="text-[11px] text-slate-400 mt-1">Técnica & Ritmo</div>
+        </button>
+
+        <button onclick="selectDay('sex')" id="pill-sex" class="day-pill flex-1 min-w-[100px] py-3 px-3 rounded-xl bg-slate-800/80 border border-slate-700 text-left transition hover:border-blue-500">
+          <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Sexta</div>
+          <div class="text-sm font-bold text-white flex items-center gap-1 mt-0.5">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Full Body 3
+          </div>
+          <div class="text-[11px] text-slate-400 mt-1">Estabilidade Geral</div>
+        </button>
+      </div>
+
+      <!-- Rest Timer Bar -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700/80 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center">
+            <i data-lucide="timer" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 font-medium">Cronômetro de Descanso</div>
+            <div id="timer-display" class="text-2xl font-black font-mono tracking-wider text-white">01:00</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="setTimer(45)" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700">45s</button>
+          <button onclick="setTimer(60)" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700">60s</button>
+          <button onclick="setTimer(90)" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700">90s</button>
+          <button id="btn-timer-toggle" onclick="toggleTimer()" class="ml-2 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 active:scale-95 text-white flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition">
+            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            <span>Iniciar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dynamic Day Content Container -->
+      <div id="workout-content-area" class="space-y-4">
+        <!-- Content injected dynamically via JS based on selected day -->
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SECTION 2: NUTRITION TAB -->
+    <!-- ============================================== -->
+    <section id="tab-nutricao" class="space-y-6 hidden">
+      
+      <!-- Macros & Goals Overview -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+            <span>Meta Proteica</span>
+            <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <div class="mt-2 text-2xl font-black text-white">140g - 160g</div>
+          <p class="text-[11px] text-slate-400 mt-1">~1,8 a 2,0 g/kg para recomposição e recuperação do tendão.</p>
+        </div>
+
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+            <span>Déficit Calórico</span>
+            <i data-lucide="trending-down" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <div class="mt-2 text-2xl font-black text-white">-350 kcal</div>
+          <p class="text-[11px] text-slate-400 mt-1">Déficit suave: queima gordura sem degradar músculo.</p>
+        </div>
+
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4">
+          <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+            <span>Meta de Água</span>
+            <i data-lucide="droplets" class="w-4 h-4 text-blue-400"></i>
+          </div>
+          <div class="mt-2 text-2xl font-black text-white">3,0 Litros</div>
+          <p class="text-[11px] text-slate-400 mt-1">Hidratação acelera metabolismo e lubrifica articulações.</p>
+        </div>
+      </div>
+
+      <!-- Water Tracker Interactive Card -->
+      <div class="bg-slate-800/90 border border-blue-500/30 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="droplet" class="w-5 h-5 text-blue-400"></i>
+              Controle de Hidratação Diária
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Você mencionou que não bebe muita água. Clique para preencher!</p>
+          </div>
+          <div class="text-right">
+            <span id="water-current" class="text-xl font-black text-blue-400">0</span>
+            <span class="text-xs text-slate-400 font-medium">/ 3000 ml</span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-900 rounded-full h-3 mt-4 overflow-hidden border border-slate-700">
+          <div id="water-bar" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+        </div>
+
+        <!-- Water Quick Buttons -->
+        <div class="flex gap-2 mt-4 flex-wrap">
+          <button onclick="addWater(250)" class="px-3 py-2 bg-slate-900 hover:bg-slate-700 active:scale-95 border border-slate-700 rounded-xl text-xs font-semibold text-slate-200 transition flex items-center gap-1.5">
+            +250 ml (Copo)
+          </button>
+          <button onclick="addWater(500)" class="px-3 py-2 bg-slate-900 hover:bg-slate-700 active:scale-95 border border-slate-700 rounded-xl text-xs font-semibold text-slate-200 transition flex items-center gap-1.5">
+            +500 ml (Garrafinha)
+          </button>
+          <button onclick="resetWater()" class="px-3 py-2 bg-slate-900/60 hover:bg-slate-900 active:scale-95 border border-slate-700/60 rounded-xl text-xs text-slate-400 hover:text-rose-400 transition ml-auto">
+            Zerar
+          </button>
+        </div>
+      </div>
+
+      <!-- Meal Plan Cards -->
+      <div class="space-y-4">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <i data-lucide="calendar" class="w-4 h-4"></i> Estrutura das Refeições do Seu Dia
+        </h3>
+
+        <!-- Refeição 1 -->
+        <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-4 sm:p-5 hover:border-slate-600 transition">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-xs">
+                01
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-amber-400 uppercase tracking-wide">07:00 - 08:00 • Café da Manhã Estratégico</div>
+                <h4 class="text-base font-bold text-white mt-0.5">Substituir o "pão puro" por Proteína + Energia</h4>
+              </div>
+            </div>
+            <span class="text-xs bg-slate-900 px-2.5 py-1 rounded-lg text-slate-300 font-medium">~25-30g Prot</span>
+          </div>
+
+          <div class="mt-3 pl-12 text-sm text-slate-300 space-y-2">
+            <p><strong>Opção Prática:</strong> 1 pão francês ou 2 fatias de pão integral com <strong>2 a 3 ovos mexidos</strong> + 1 fatia de queijo branco (minas/ricota).</p>
+            <p><strong>Acompanhamento:</strong> Café preto (com pouco ou sem açúcar) + 1 fruta (banana ou mamão pequeno).</p>
+            <p class="text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/50 p-2 rounded-lg">
+              <strong>Impacto:</strong> A proteína logo pela manhã acaba com a vontade incontrolável de comer besteiras no meio da manhã no escritório.
+            </p>
+          </div>
+        </div>
+
+        <!-- Refeição 2 -->
+        <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-4 sm:p-5 hover:border-slate-600 transition">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-xs">
+                02
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-blue-400 uppercase tracking-wide">12:00 - 13:00 • Almoço Recomp</div>
+                <h4 class="text-base font-bold text-white mt-0.5">Regra do Prato Dividido</h4>
+              </div>
+            </div>
+            <span class="text-xs bg-slate-900 px-2.5 py-1 rounded-lg text-slate-300 font-medium">~40-45g Prot</span>
+          </div>
+
+          <div class="mt-3 pl-12 text-sm text-slate-300 space-y-2">
+            <p><strong>50% do prato:</strong> Salada crua e legumes cozidos à vontade (brócolis, cenoura, tomate, folhas verdes).</p>
+            <p><strong>25% do prato (Proteína Magra):</strong> 150g a 180g de peito de frango grelhado, patinho moído, tilápia ou lombo suíno.</p>
+            <p><strong>25% do prato (Carboidrato Complexo):</strong> 4 a 5 colheres de sopa de arroz + 1 concha de feijão (ou 150g de batata doce/aipim).</p>
+          </div>
+        </div>
+
+        <!-- Refeição 3 -->
+        <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-4 sm:p-5 hover:border-slate-600 transition">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold text-xs">
+                03
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-purple-400 uppercase tracking-wide">16:30 - 17:30 • Lanche da Tarde Anti-Besteira</div>
+                <h4 class="text-base font-bold text-white mt-0.5">Pré-treino ou Barreira contra a Fome</h4>
+              </div>
+            </div>
+            <span class="text-xs bg-slate-900 px-2.5 py-1 rounded-lg text-slate-300 font-medium">~25g Prot</span>
+          </div>
+
+          <div class="mt-3 pl-12 text-sm text-slate-300 space-y-2">
+            <p><strong>Opção Rápida:</strong> 1 dose de Whey Protein batido com água ou leite desnatado + 1 maçã ou banana.</p>
+            <p><strong>Opção Sólida de Mercado:</strong> 1 pote de iogurte com alto teor proteico (ex.: tipo YoPRO ou similar de 15g prot) + 1 punhado pequeno de castanhas/amendoim.</p>
+            <p class="text-xs text-purple-300 bg-purple-950/40 border border-purple-800/50 p-2 rounded-lg">
+              Evite ir ao treino ou chegar em casa no jantar com fome voraz, pois é aí que o delivery ou doces viram gatilhos.
+            </p>
+          </div>
+        </div>
+
+        <!-- Refeição 4 -->
+        <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-4 sm:p-5 hover:border-slate-600 transition">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs">
+                04
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wide">20:00 - 21:00 • Jantar Reparador</div>
+                <h4 class="text-base font-bold text-white mt-0.5">Leveza para Garantir um Sono Profundo</h4>
+              </div>
+            </div>
+            <span class="text-xs bg-slate-900 px-2.5 py-1 rounded-lg text-slate-300 font-medium">~35-40g Prot</span>
+          </div>
+
+          <div class="mt-3 pl-12 text-sm text-slate-300 space-y-2">
+            <p><strong>Estrutura:</strong> Semelhante ao almoço, porém com ênfase em fácil digestão.</p>
+            <p><strong>Prato:</strong> 150g de peixe, frango desfiado ou ovos + legumes cozidos no azeite de oliva extravirgem + porção moderada de carboidrato (arroz ou abóbora).</p>
+            <p class="text-xs text-slate-400">Jantar pelo menos 1h30 a 2h antes de deitar para não fragmentar o sono profundo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SECTION 3: REHAB & WELLNESS TAB -->
+    <!-- ============================================== -->
+    <section id="tab-cuidados" class="space-y-6 hidden">
+      
+      <!-- Tendon & Knee Banner -->
+      <div class="bg-gradient-to-br from-slate-900 to-slate-800 border border-emerald-500/30 rounded-2xl p-6">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-emerald-400"></i>
+          Protocolo Seguro: Pós-Operatório de Aquiles (1 ano) + Estalos no Joelho
+        </h3>
+        <p class="text-sm text-slate-300 mt-2 leading-relaxed">
+          O tendão cicatrizado tem menor elasticidade que o natural. O segredo da longevidade é o <strong>trabalho excêntrico</strong> (controlar a descida) e jamais dar "trancos" ou saltos agora.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+          <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl">
+            <h4 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i> O que FAZER sempre:
+            </h4>
+            <ul class="text-xs text-slate-300 mt-2 space-y-1.5 list-disc list-inside">
+              <li>Aquecer o tornozelo com círculos e flexões antes de qualquer treino.</li>
+              <li>Sustentar 2 segundos no topo da panturrilha e descer em 3 a 4 segundos.</li>
+              <li>Treinar o músculo <strong>Sóleo</strong> (panturrilha sentado com joelhos dobrados a 90°), pois ele absorve até 8x o peso do corpo na marcha.</li>
+              <li>Aproveitar a natação para soltar as articulações sem nenhum impacto axial.</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl">
+            <h4 class="text-sm font-bold text-rose-400 flex items-center gap-2">
+              <i data-lucide="x-circle" class="w-4 h-4"></i> O que EVITAR neste momento:
+            </h4>
+            <ul class="text-xs text-slate-300 mt-2 space-y-1.5 list-disc list-inside">
+              <li>Pular corda, saltar caixas (box jumps) ou tiros de corrida rápida.</li>
+              <li>Fazer repetições "quicando" a carga embaixo no Leg Press ou Panturrilha.</li>
+              <li>Bater a perna muito rápido na natação se sentir desconforto na virada de borda.</li>
+              <li>Ficar dias inteiros sem movimentar o tornozelo (levante e caminhe a cada 90 min de trabalho sentado).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sleep & Recovery Tips -->
+      <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-5">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="moon" class="w-5 h-5 text-indigo-400"></i>
+          Otimização do Sono (Mudança para perto do trabalho)
+        </h3>
+        <p class="text-xs text-slate-400 mt-1">
+          Você reduziu o tempo de deslocamento; agora use isso para subir de 5h-6h para <strong>7 horas de sono sólido</strong>.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+          <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-xl">
+            <div class="text-xs font-bold text-indigo-300">Corte de Cafeína</div>
+            <p class="text-[11px] text-slate-400 mt-1">Último cafezinho no máximo às 14h30 para não atrapalhar o sono REM.</p>
+          </div>
+          <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-xl">
+            <div class="text-xs font-bold text-indigo-300">Desconexão de Telas</div>
+            <p class="text-[11px] text-slate-400 mt-1">Evite telas intensas 30 min antes de deitar; a luz azul bloqueia a melatonina.</p>
+          </div>
+          <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-xl">
+            <div class="text-xs font-bold text-indigo-300">Quarto Escuro & Frio</div>
+            <p class="text-[11px] text-slate-400 mt-1">A temperatura levemente amena facilita a entrada no sono de restauração celular.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast-msg" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-blue-600 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-semibold">
+    <i data-lucide="check" class="w-4 h-4"></i>
+    <span id="toast-text">Progresso salvo!</span>
+  </div>
+
+  <script>
+    // --- WORKOUT DATABASE WITH VIDEOS / GUIDES & ADAPTED FOR USER ---
+    const workoutPlan = {
+      seg: {
+        title: "Full Body 1: Ênfase Quadríceps, Peito & Sóleo",
+        focus: "Recomposição + Proteção Tendínea",
+        duration: "50 - 60 min",
+        type: "musculacao",
+        notes: "Controle absoluto na descida de todos os movimentos de membros inferiores.",
+        exercises: [
+          {
+            name: "Leg Press 45° ou Horizontal",
+            group: "Pernas (Quadríceps)",
+            series: "4 séries x 10 a 12 reps",
+            rest: "60-90s",
+            obs: "Pés inteiros apoiados na plataforma média/alta. Não estale nem hiperextenda o joelho no final."
+          },
+          {
+            name: "Panturrilha Sentado na Máquina",
+            group: "Tendão / Sóleo (Crucial)",
+            series: "3 séries x 12 a 15 reps",
+            rest: "60s",
+            obs: "Com joelhos a 90°, o sóleo trabalha diretamente para reforçar o tendão de Aquiles. Desça em 3 segundos."
+          },
+          {
+            name: "Supino Reto com Halteres",
+            group: "Peitoral",
+            series: "3 séries x 10 a 12 reps",
+            rest: "60-75s",
+            obs: "Halteres permitem trajetória articular mais livre e confortável para os ombros."
+          },
+          {
+            name: "Puxada Aberta no Pulley Frontal",
+            group: "Costas",
+            series: "3 séries x 10 a 12 reps",
+            rest: "60s",
+            obs: "Puxe direcionando os cotovelos para baixo, mantendo o peito estufado e core firme."
+          },
+          {
+            name: "Desenvolvimento com Halteres Sentado",
+            group: "Ombros (Deltóides)",
+            series: "3 séries x 10 a 12 reps",
+            rest: "60s",
+            obs: "Banco inclinado a 75°-80° para conforto da lombar e encaixe escapular."
+          },
+          {
+            name: "Rosca Direta no Cabo ou Barra W",
+            group: "Bíceps",
+            series: "3 séries x 12 reps",
+            rest: "45-60s",
+            obs: "Cotovelos fixos ao lado do corpo."
+          },
+          {
+            name: "Tríceps Corda no Pulley",
+            group: "Tríceps",
+            series: "3 séries x 12 a 15 reps",
+            rest: "45-60s",
+            obs: "Abra a corda no final do movimento para contração máxima da cabeça lateral."
+          }
+        ]
+      },
+      ter: {
+        title: "Natação: Regenerativa e Condicionamento Aeróbio",
+        focus: "Cardio de Zero Impacto para o Tendão",
+        duration: "35 - 45 min",
+        type: "natacao",
+        notes: "Treino contínuo e suave. Excelente para aumentar o gasto calórico sem agredir as articulações.",
+        exercises: [
+          {
+            name: "Aquecimento: Nado Livre Suave (Crawl)",
+            group: "Aquecimento",
+            series: "200m a 300m (Ritmo bem leve)",
+            rest: "Pausas de 20s",
+            obs: "Foque na respiração rítmica e no deslize na água."
+          },
+          {
+            name: "Educativo de Braçada com Palmar ou Flutuador (Pullbuoy)",
+            group: "Tronco & Ombros",
+            series: "4 x 50m (Descanso de 25s entre tiros)",
+            rest: "25s",
+            obs: "O flutuador entre as pernas poupa totalmente os pés/tornozelos e fortalece tronco e dorsais."
+          },
+          {
+            name: "Pernada Leve com Prancha (Opcional)",
+            group: "Mobilidade de Tornozelo",
+            series: "4 x 25m suave",
+            rest: "30s",
+            obs: "Bata a perna de forma solta sem forçar a ponta do pé operado contra a água."
+          },
+          {
+            name: "Bloco Principal Contínuo (Crawl alternando com Costas)",
+            group: "Capacidade Cardiorrespiratória",
+            series: "400m a 600m fracionados (ex.: 8 x 50m ritmo constante)",
+            rest: "30s",
+            obs: "Mantenha a frequência cardíaca na zona aeróbica confortável (conseguindo respirar controlado)."
+          },
+          {
+            name: "Desaquecimento / Soltura",
+            group: "Relaxamento",
+            series: "100m nado peito ou costas bem lento",
+            rest: "-",
+            obs: "Finalize respirando fundo e alongando levemente na borda da piscina."
+          }
+        ]
+      },
+      qua: {
+        title: "Full Body 2: Ênfase Posterior Joelho & Costas",
+        focus: "Estabilidade Patelar + Supersérie de Braços",
+        duration: "50 - 55 min",
+        type: "musculacao",
+        notes: "Fortalecer isquiotibiais (parte de trás da coxa) equilibra a patela e reduz estalos no joelho.",
+        exercises: [
+          {
+            name: "Mesa Flexora ou Cadeira Flexora",
+            group: "Pernas (Posterior / Isquiotibiais)",
+            series: "4 séries x 10 a 12 reps",
+            rest: "60-75s",
+            obs: "Não deixe a carga despencar. Controle a fase excêntrica para proteger o joelho."
+          },
+          {
+            name: "Supino Inclinado com Halteres (30°)",
+            group: "Peitoral Superior",
+            series: "3 séries x 10 a 12 reps",
+            rest: "60s",
+            obs: "Excelente construtor da porção clavicular do peito."
+          },
+          {
+            name: "Remada Baixa no Triângulo (Polia)",
+            group: "Costas (Espessura)",
+            series: "3 séries x 10 a 12 reps",
+            rest: "60s",
+            obs: "Mantenha coluna ereta e sinta as escápulas se juntando no final."
+          },
+          {
+            name: "Elevação Lateral com Halteres",
+            group: "Ombros (Deltóide Lateral)",
+            series: "4 séries x 12 a 15 reps",
+            rest: "45-60s",
+            obs: "Braços ligeiramente à frente do corpo (no plano escapular)."
+          },
+          {
+            name: "Supersérie 1: Rosca Alternada com Halteres",
+            group: "Bíceps",
+            series: "3 séries x 10 a 12 reps",
+            rest: "Sem pausa",
+            obs: "Faça uma série de bíceps e vá direto para o tríceps abaixo!"
+          },
+          {
+            name: "Supersérie 2: Tríceps Testa na Polia com Barra",
+            group: "Tríceps",
+            series: "3 séries x 12 reps",
+            rest: "60s após a dupla",
+            obs: "Complete a supersérie e descanse 60s antes da próxima repetição da dupla."
+          }
+        ]
+      },
+      qui: {
+        title: "Natação: Ritmo & Queima Calórica",
+        focus: "Intervalado Leve / Moderado",
+        duration: "35 - 45 min",
+        type: "natacao",
+        notes: "Excelente para turbinar a sensibilidade à insulina e acelerar o gasto de gordura.",
+        exercises: [
+          {
+            name: "Aquecimento Livre",
+            group: "Aquecimento",
+            series: "200m contínuos e soltos",
+            rest: "1 min",
+            obs: "Adapte o corpo à temperatura da água e solte os ombros."
+          },
+          {
+            name: "Série Intervalada 50m Ritmo Progressivo",
+            group: "Intervalado",
+            series: "6 x 50m (25m moderado + 25m um pouco mais firme)",
+            rest: "30s entre tiros",
+            obs: "Aumente levemente a cadência dos braços sem perder a coordenação da respiração."
+          },
+          {
+            name: "Nado Costas / Peito",
+            group: "Tronco & Quadril",
+            series: "4 x 50m",
+            rest: "25s",
+            obs: "Alivia a tensão do peitoral e abre o gradil costal."
+          },
+          {
+            name: "Soltura Final",
+            group: "Recuperação",
+            series: "150m nado calmo",
+            rest: "-",
+            obs: "Diminua os batimentos cardíacos gradativamente."
+          }
+        ]
+      },
+      sex: {
+        title: "Full Body 3: Glúteos, Gastrocnêmio & Força Geral",
+        focus: "Estabilidade Global para Fechar a Semana",
+        duration: "50 - 60 min",
+        type: "musculacao",
+        notes: "Reforço muscular para curtir o final de semana sem dores articulares.",
+        exercises: [
+          {
+            name: "Cadeira Extensora (Controlada)",
+            group: "Pernas (Quadríceps / Reto Femoral)",
+            series: "3 séries x 12 a 15 reps",
+            rest: "60s",
+            obs: "Suba em 1 segundo e desça em 3 segundos. Não dê tranco de peso."
+          },
+          {
+            name: "Panturrilha em Pé na Máquina ou Degrau",
+            group: "Tendão / Gastrocnêmio",
+            series: "3 séries x 10 a 12 reps",
+            rest: "60s",
+            obs: "Com joelhos estendidos (mas destravados). Não fique 'quicando' no degrau."
+          },
+          {
+            name: "Crucifixo Reto na Máquina (Peck Deck) ou Cabos",
+            group: "Peitoral",
+            series: "3 séries x 12 a 15 reps",
+            rest: "60s",
+            obs: "Alongamento seguro sem forçar o manguito rotador."
+          },
+          {
+            name: "Remada Articulada ou Cavalinho",
+            group: "Costas",
+            series: "3 séries x 10 a 12 reps",
+            rest: "60s",
+            obs: "Peito bem colado no apoio se usar máquina com suporte frontal."
+          },
+          {
+            name: "Crucifixo Inverso na Máquina ou Cabos",
+            group: "Ombro Posterior / Manguito",
+            series: "3 séries x 15 reps",
+            rest: "45s",
+            obs: "Crucial para postura de quem passa horas no computador."
+          },
+          {
+            name: "Rosca Martelo com Halteres",
+            group: "Bíceps & Braquial",
+            series: "3 séries x 12 reps",
+            rest: "45s",
+            obs: "Pegada neutra (palmas voltadas para dentro), fortalecendo os antebraços."
+          },
+          {
+            name: "Tríceps Francês na Polia ou com Halter",
+            group: "Tríceps (Cabeça Longa)",
+            series: "3 séries x 12 reps",
+            rest: "45s",
+            obs: "Mantenha os cotovelos alinhados e próximos à cabeça."
+          }
+        ]
+      }
+    };
+
+    // State Variables
+    let currentDay = 'seg';
+    let waterIntake = 0;
+    const waterGoal = 3000;
+    let timerDuration = 60;
+    let timerRemaining = 60;
+    let timerInterval = null;
+    let isTimerRunning = false;
+    let completedExercises = {};
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+      renderWorkout(currentDay);
+      updateWaterDisplay();
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    };
+
+    // --- TAB SWITCHER ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`nav-${tabId}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.getElementById('tab-treino').classList.add('hidden');
+      document.getElementById('tab-nutricao').classList.add('hidden');
+      document.getElementById('tab-cuidados').classList.add('hidden');
+
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.remove('hidden');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // --- DAY SELECTOR ---
+    function selectDay(dayKey) {
+      currentDay = dayKey;
+      document.querySelectorAll('.day-pill').forEach(pill => pill.classList.remove('active'));
+      const activePill = document.getElementById(`pill-${dayKey}`);
+      if (activePill) activePill.classList.add('active');
+
+      renderWorkout(dayKey);
+    }
+
+    // --- STREAMING_CHUNK:Rendering dynamic day workouts with interactive checklist ---
+    function renderWorkout(dayKey) {
+      const data = workoutPlan[dayKey];
+      const container = document.getElementById('workout-content-area');
+      if (!data || !container) return;
+
+      const isSwimming = data.type === 'natacao';
+
+      let html = `
+        <div class="bg-slate-850 bg-slate-900 border ${isSwimming ? 'border-cyan-500/40' : 'border-blue-500/30'} rounded-2xl p-5 shadow-lg">
+          <div class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${isSwimming ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}">
+                  ${isSwimming ? 'Natação de Baixo Impacto' : 'Full Body Gym (Vídeo Adaptado)'}
+                </span>
+                <span class="text-xs text-slate-400 font-medium flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${data.duration}
+                </span>
+              </div>
+              <h2 class="text-lg sm:text-xl font-bold text-white mt-1.5">${data.title}</h2>
+              <p class="text-xs text-slate-300 mt-0.5">${data.notes}</p>
+            </div>
+            
+            <div class="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700 text-right">
+              <div class="text-[10px] text-slate-400 font-semibold uppercase">Foco Principal</div>
+              <div class="text-xs font-bold text-slate-200">${data.focus}</div>
+            </div>
+          </div>
+
+          <!-- Exercise List -->
+          <div class="divide-y divide-slate-800/80 mt-2">
+      `;
+
+      data.exercises.forEach((ex, idx) => {
+        const itemKey = `${dayKey}-${idx}`;
+        const isDone = completedExercises[itemKey] || false;
+
+        html += `
+          <div class="py-3.5 flex items-start gap-3.5 group hover:bg-slate-800/30 rounded-xl px-2 transition">
+            <button onclick="toggleExercise('${itemKey}')" class="mt-1 w-6 h-6 rounded-lg border flex items-center justify-center transition ${isDone ? 'bg-emerald-500 border-emerald-400 text-slate-950' : 'border-slate-600 hover:border-blue-400 text-transparent'}">
+              <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
+            </button>
+            <div class="flex-1 ${isDone ? 'exercise-done' : ''}">
+              <div class="flex items-center justify-between flex-wrap gap-1">
+                <h4 class="text-sm sm:text-base font-semibold text-white tracking-tight">${ex.name}</h4>
+                <span class="text-xs font-bold text-blue-400 bg-blue-950/60 border border-blue-800/50 px-2 py-0.5 rounded-md">
+                  ${ex.series}
+                </span>
+              </div>
+              <div class="flex items-center gap-2 mt-1 text-xs text-slate-400">
+                <span class="font-medium text-slate-300">${ex.group}</span>
+                <span>•</span>
+                <span>Descanso: ${ex.rest}</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1.5 bg-slate-950/50 p-2 rounded-lg border border-slate-800/70">
+                <strong class="text-slate-300">Dica de Segurança:</strong> ${ex.obs}
+              </p>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Toggle Exercise Done State
+    function toggleExercise(key) {
+      completedExercises[key] = !completedExercises[key];
+      renderWorkout(currentDay);
+      showToast(completedExercises[key] ? "Exercício concluído!" : "Exercício desmarcado");
+    }
+
+    // Reset Day
+    document.getElementById('btn-reset-day').addEventListener('click', function() {
+      Object.keys(completedExercises).forEach(k => {
+        if (k.startsWith(currentDay)) {
+          delete completedExercises[k];
+        }
+      });
+      renderWorkout(currentDay);
+      showToast("Checklist do dia redefinido!");
+    });
+
+    // --- REST TIMER LOGIC ---
+    function setTimer(seconds) {
+      pauseTimer();
+      timerDuration = seconds;
+      timerRemaining = seconds;
+      updateTimerDisplay();
+    }
+
+    function toggleTimer() {
+      if (isTimerRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    }
+
+    function startTimer() {
+      if (timerRemaining <= 0) {
+        timerRemaining = timerDuration;
+      }
+      isTimerRunning = true;
+      updateTimerBtn();
+
+      timerInterval = setInterval(() => {
+        timerRemaining--;
+        updateTimerDisplay();
+
+        if (timerRemaining <= 0) {
+          pauseTimer();
+          showToast("Tempo de descanso finalizado! Próxima série!");
+          playTimerBeep();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      updateTimerBtn();
+    }
+
+    function updateTimerBtn() {
+      const btn = document.getElementById('btn-timer-toggle');
+      if (!btn) return;
+      if (isTimerRunning) {
+        btn.innerHTML = `<i data-lucide="pause" class="w-3.5 h-3.5"></i><span>Pausar</span>`;
+        btn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
+        btn.classList.add('bg-amber-600', 'hover:bg-amber-500');
+      } else {
+        btn.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5"></i><span>Iniciar</span>`;
+        btn.classList.add('bg-blue-600', 'hover:bg-blue-500');
+        btn.classList.remove('bg-amber-600', 'hover:bg-amber-500');
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function updateTimerDisplay() {
+      const display = document.getElementById('timer-display');
+      if (!display) return;
+      const m = Math.floor(timerRemaining / 60);
+      const s = timerRemaining % 60;
+      display.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function playTimerBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch (e) {
+        // Fallback silently if audio context is blocked
+      }
+    }
+
+    // --- WATER INTAKE TRACKER ---
+    function addWater(amount) {
+      waterIntake = Math.min(waterGoal, waterIntake + amount);
+      updateWaterDisplay();
+      showToast(`+${amount}ml adicionados!`);
+    }
+
+    function resetWater() {
+      waterIntake = 0;
+      updateWaterDisplay();
+      showToast("Contador de água zerado!");
+    }
+
+    function updateWaterDisplay() {
+      const text = document.getElementById('water-current');
+      const bar = document.getElementById('water-bar');
+      if (text) text.textContent = waterIntake;
+      if (bar) {
+        const pct = Math.min(100, Math.round((waterIntake / waterGoal) * 100));
+        bar.style.width = `${pct}%`;
+      }
+    }
+
+    // --- TOAST NOTIFICATION ---
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      const text = document.getElementById('toast-text');
+      if (!toast || !text) return;
+      text.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
